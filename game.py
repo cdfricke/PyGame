@@ -46,12 +46,19 @@ class Object:
         self.position = center          # set position at middle of screen
         self.velocity = zeroVec         # set velocity to zero
         self.acceleration = zeroVec     # set acceleration to zero
+        self.force = zeroVec            # this is the force that the current object "feels"
 
     # call draw() to automatically draw the circle with it's current attributes
     def draw(self):
         pygame.draw.circle(surface=screen, color=self.COLOR, center=self.position, radius=self.RADIUS)
 
-STARTPOS = center - 50*(yhat) + 50*(xhat)
+    def update(self, deltaTime):
+        # update acceleration, velocity, and position
+        self.acceleration = self.force / orbitor.MASS
+        self.velocity += orbitor.acceleration
+        self.position += orbitor.velocity * deltaTime
+
+STARTPOS = center + (50*xhat) - (50*yhat)
 orbitor = Object(mass=100.0, color="blue", radius=10.0)
 orbitor.position = STARTPOS
 
@@ -81,10 +88,12 @@ while running:
     # force points from circle position to the center
     force = (sun.position - orbitor.position)
 
+    orbitor.force = force
+
     # update acceleration, velocity, and position
-    orbitor.acceleration = force / orbitor.MASS
-    orbitor.velocity += orbitor.acceleration
-    orbitor.position += orbitor.velocity * dt
+    VxBefore = orbitor.velocity.x
+    orbitor.update(dt)
+    VxAfter = orbitor.velocity.x
 
     # reverse direction at edges
     if ( (orbitor.position.y - orbitor.RADIUS) < 0 or (orbitor.position.y + orbitor.RADIUS) > screen.get_height()):
@@ -99,9 +108,8 @@ while running:
     dt = clock.tick(60) / 1000
     accumulatedTime += dt
 
-    # trigger the flipping of "inFront"
-    if ((orbitor.velocity).magnitude() < 0.5):
-        print("Flipping!")
+    # trigger the flipping of "inFront" when the x component of velocity changes sign
+    if (VxBefore * VxAfter < 0):
         inFront = not inFront
 
 pygame.quit()
