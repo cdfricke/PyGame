@@ -8,8 +8,8 @@ running = True
 dt = 0
 
 # ***** CLASS DEFINITION *****
-class Circle:
-    """This is the base object of my game"""
+class Object:
+    """This is the base object of my game. It is drawn in game as a circle"""
     def __init__(self):
         self.radius = 20.0
         self.position = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
@@ -36,7 +36,7 @@ class Circle:
         self.color = c
     
 
-myCircle = Circle()
+myCircle = Object()
 
 # ***** GAME LOOP *****
 while running:
