@@ -101,6 +101,7 @@ while running:
 
     # trigger the flipping of "inFront"
     if ((orbitor.velocity).magnitude() < 0.5):
+        print("Flipping!")
         inFront = not inFront
 
 pygame.quit()
