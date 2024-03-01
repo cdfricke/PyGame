@@ -1,7 +1,7 @@
-# File: multi-orbit.py
+# File: three_body.py
 # Programmer: Connor Fricke (cd.fricke23@gmail.com)
 # Last Revision:
-#   29-FEB-2024 --> Created
+#   29-FEB-2024 --> Created, v1
 
 import pygame
 HEIGHT = 720
@@ -50,24 +50,25 @@ class Object:
         aVec = ((GRAV * accelerator.MASS) / (r*r*r)) * rVec
         return aVec
 
-    def update(self, deltaTime, accelerator):
-        # update acceleration, velocity, and position
-        self.acceleration = self.getAccel(accelerator)
-        self.velocity += self.acceleration
-        self.position += self.velocity * deltaTime
+    def update(self, deltaTime, acceleratorArray):
+        for accelerator in acceleratorArray:
+            # update acceleration, velocity, and position
+            self.acceleration = self.getAccel(accelerator)
+            self.velocity += self.acceleration
+            self.position += self.velocity * deltaTime
     
 
 # ***** INITIAL CONDITIONS *****
-STARTVEL = (100*yhat)
+STARTVEL = -(100*yhat)
 STARTPOS = center + (50*xhat)
 
 # orbitor1 object
-orbitor1 = Object(mass=5.0, color="blue", radius=5.0)
+orbitor1 = Object(mass=1.0, color="blue", radius=5.0)
 orbitor1.position = STARTPOS
 orbitor1.velocity = STARTVEL
 
 # orbitor2 object
-orbitor2 = Object(mass=5.0, color="green", radius=5.0)
+orbitor2 = Object(mass=1.0, color="green", radius=5.0)
 orbitor2.position = STARTPOS + (100*xhat)
 orbitor2.velocity = 0.5*STARTVEL
 
@@ -78,6 +79,8 @@ sun = Object(mass=100.0, color="yellow",radius=20.0)
 objArray = []
 objArray.append(orbitor1)
 objArray.append(orbitor2)
+
+sunArray = [sun]
 
 # ***** GAME LOOP *****
 while running:
@@ -93,7 +96,7 @@ while running:
     sun.draw()
     for obj in objArray:
         obj.draw()
-        obj.update(dt, sun)
+        obj.update(dt, sunArray)
 
     # IF NECESSARY, reverse direction at edges
     #if ( (orbitor1.position.y - orbitor1.RADIUS) < 0 or (orbitor1.position.y + orbitor1.RADIUS) > screen.get_height()):

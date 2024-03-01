@@ -3,4 +3,4 @@ python -m pip install pygame > install.log
 
 python single_orbit.py
 
-python multi_orbit.py
+python three_body.py
