@@ -59,14 +59,14 @@ class Object:
 
 # ***** INITIAL CONDITIONS *****
 # orbitor1 object
-orbitor1 = Object(mass=150.0, color="blue", radius=5.0)
+orbitor1 = Object(mass=150.0, color="blue", radius=20.0)
 orbitor1.position = center - (50*xhat)
-orbitor1.velocity = (50*yhat)
+orbitor1.velocity = (52*yhat)
 
 # orbitor2 object
-orbitor2 = Object(mass=150.0, color="green", radius=5.0)
+orbitor2 = Object(mass=150.0, color="green", radius=20.0)
 orbitor2.position = center + (50*xhat)
-orbitor2.velocity = -(50*yhat)
+orbitor2.velocity = -(52*yhat)
 
 # ***** GAME LOOP *****
 while running:
@@ -79,7 +79,7 @@ while running:
     screen.fill("black")
 
     # *** RENDER THE GAME HERE ***
-    if ( (orbitor1.position - orbitor2.position).magnitude() < orbitor1.RADIUS ):
+    if ( (orbitor1.position - orbitor2.position).magnitude() < orbitor1.RADIUS*0.25 ):
         merged = True
         mergedObj = Object(mass=2*orbitor1.MASS, radius=orbitor1.RADIUS*1.44, color="white")
         mergedObj.position = orbitor1.position
@@ -92,10 +92,6 @@ while running:
         orbitor2.update(dt, orbitor1)
     else:
         mergedObj.draw()
-
-    
-
-    
 
     # IF NECESSARY, reverse direction at edges
     #if ( (orbitor1.position.y - orbitor1.RADIUS) < 0 or (orbitor1.position.y + orbitor1.RADIUS) > screen.get_height()):
