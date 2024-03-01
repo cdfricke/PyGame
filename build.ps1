@@ -1,4 +1,6 @@
 # build script to install packages and run game
 python -m pip install pygame > install.log
 
-python game.py
+python single_orbit.py
+
+python multi_orbit.py

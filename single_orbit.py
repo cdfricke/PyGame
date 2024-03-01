@@ -66,17 +66,12 @@ STARTVEL = (50*xhat) + (50*yhat)
 STARTPOS = center + (50*xhat) - (50*yhat) 
 
 # orbitor object
-orbitor = Object(mass=50.0, color="blue", radius=5.0)
+orbitor = Object(mass=5.0, color="blue", radius=5.0)
 orbitor.position = STARTPOS
 orbitor.velocity = STARTVEL
 
 # sun object, default position and velocity (centered, zero)
 sun = Object(mass=100.0, color="yellow",radius=20.0)
-
-# store objects into an array
-objArray = []
-objArray.append(orbitor)
-objArray.append(sun)
 
 # ***** GAME LOOP *****
 while running:
@@ -100,8 +95,6 @@ while running:
     rVec = (orbitor.position - sun.position)
     distanceTo = rVec.magnitude()
     rhat = rVec / distanceTo
-
-    print(distanceTo)
 
     if (distanceTo > sun.RADIUS):
         orbitor.force = -((GRAV * sun.MASS * orbitor.MASS) / (distanceTo * distanceTo)) * rhat
