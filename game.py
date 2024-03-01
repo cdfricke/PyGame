@@ -8,6 +8,7 @@
 #   - Allow for movement of sun
 #   - Create and randomize locations / velocities of N-bodies
 #   - Correct behavior of gravity for very small r
+#   - Add some GUI stuff
 
 import pygame
 HEIGHT = 720
