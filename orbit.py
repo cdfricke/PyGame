@@ -1,4 +1,4 @@
-# File: game.py
+# File: orbit.py
 # Programmer: Connor Fricke (cd.fricke23@gmail.com)
 # Last Revision:
 #   28-FEB-2024 ---> defined commonly used vectors, object class, initialized project
