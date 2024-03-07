@@ -6,8 +6,6 @@
 # TODO:
 #   - Do force calculation from object array to prepare for N-body sim
 #   - Allow for movement of sun
-#   - Create and randomize locations / velocities of N-bodies
-#   - Correct behavior of gravity for very small r
 #   - Add some GUI stuff
 
 # *** INITIALIZE ***
@@ -21,7 +19,7 @@ running = True
 inFront = True
 dt = 0
 frame = 0
-GRAV = 50.0
+GRAV = 40.0
 # ******************
 
 # *** COMMON VECTORS AND LOCATIONS ***
@@ -83,11 +81,10 @@ class Grid:
 
 class Object:
     """This is the base object of my game. It is drawn in game as a circle"""
-    def __init__(self, radius, mass, color):
+    def __init__(self, radius, mass):
         # constants
         self.RADIUS = radius
         self.MASS = mass
-        self.COLOR = color
         # variables
         self.position = center          # set position at middle of screen
         self.velocity = origin            # set velocity to zero
@@ -95,30 +92,42 @@ class Object:
         self.force = zero               # this is the force that the current object "feels"
 
     # call draw() to automatically draw the circle with it's current attributes
-    def draw(self):
-        pygame.draw.circle(surface=screen, color=self.COLOR, center=self.position, radius=self.RADIUS)
+    def draw(self, surface, color):
+        pygame.draw.circle(surface=surface, color=color, center=self.position, radius=self.RADIUS)
 
     def update(self, deltaTime):
         # update acceleration, velocity, and position
         self.acceleration = self.force / self.MASS
         self.velocity += self.acceleration
         self.position += self.velocity * deltaTime
+
+class Trail:
+    def __init__(self):
+        self.pointArray = []
+        
+    def draw(self, surface, color, width):
+        pygame.draw.lines(surface=surface, color=color, closed=False, points=self.pointArray, width=width)
+
+    def addPoint(self, point):
+        self.pointArray.append(point)
+        # limit trail length to 50 points (experimental value)
+        if (len(self.pointArray) > 700):
+            self.pointArray.pop(0)
         
 # *************************
 
 # ***** INITIAL CONDITIONS *****
-STARTVEL = (50*xhat) + (50*yhat)
-STARTPOS = center + (50*xhat) - (50*yhat) 
-
-# orbitor object
-orbitor = Object(mass=5.0, color="blue", radius=5.0)
-orbitor.position = STARTPOS
-orbitor.velocity = STARTVEL
-
-# sun object, default position and velocity (centered, zero)
-sun = Object(mass=100.0, color="yellow",radius=20.0)
+# orbitor object, non-default position and velocity
+orbitor = Object(mass=5.0, radius=10.0)
+orbitor.position = center + 250*xhat
+orbitor.velocity = 30*yhat
+# sun object, default position and velocity
+sun = Object(mass=100.0, radius=20.0)
 
 radialArrow = Arrow(sun.position, orbitor.position)
+gameGrid = Grid(20,20)
+earthTrail = Trail()
+earthTrail.addPoint(orbitor.position.copy())
 
 # ***** GAME LOOP *****
 while running:
@@ -130,16 +139,24 @@ while running:
     # wipe away anything from the previous frame
     screen.fill("black")
 
+    currentPosition = orbitor.position.copy()
+    # add current position of the orbitor to the Trail object array every 20 frames
+    if (frame % 5 == 0):
+        earthTrail.addPoint(currentPosition)
+
     # *** RENDER THE GAME HERE ***
+    gameGrid.draw(screen, "dark grey", 1)
+    earthTrail.draw(screen, "green", 1)
+
     if (inFront):
-        sun.draw()
-        orbitor.draw()
+        sun.draw(screen, "yellow")
+        orbitor.draw(screen, "blue")
     else:   
-        orbitor.draw()
-        sun.draw()
+        orbitor.draw(screen, "blue")
+        sun.draw(screen, "yellow")
 
     radialArrow.setTailToTip(sun.position, orbitor.position)
-    radialArrow.draw(screen, "white", 3)
+    radialArrow.draw(screen, "red", 3)
     
     # force points from circle position to the center
     rVec = (orbitor.position - sun.position)
