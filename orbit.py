@@ -4,9 +4,7 @@
 #   28-FEB-2024 ---> defined commonly used vectors, object class, initialized project
 #   29-FEB-2024 ---> defined gravity as inverse square law, assessed TODO list
 # TODO:
-#   - Do force calculation from object array to prepare for N-body sim
-#   - Allow for movement of sun
-#   - Add some GUI stuff
+#   - add some GUI stuff
 
 # *** INITIALIZE ***
 import pygame
@@ -111,24 +109,37 @@ class Trail:
 
     def addPoint(self, point):
         self.pointArray.append(point)
-        # limit trail length to 50 points (experimental value)
-        if (len(self.pointArray) > 700):
+        # limit trail length to N points (N should be determined based on the orbit length)
+        if (len(self.pointArray) > 600):
             self.pointArray.pop(0)
         
 # *************************
 
 # ***** INITIAL CONDITIONS *****
-# orbitor object, non-default position and velocity
-orbitor = Object(mass=5.0, radius=10.0)
-orbitor.position = center + 250*xhat
-orbitor.velocity = 30*yhat
 # sun object, default position and velocity
 sun = Object(mass=100.0, radius=20.0)
+# orbitor1 object, non-default position and velocity
+orbitor1 = Object(mass=5.0, radius=10.0)
+orbitor1.position = center + 250*xhat
+orbitor1.velocity = 31*yhat
+# orbitor2 object, non-default position and velocity
+orbitor2 = Object(mass=5.0, radius=10.0)
+orbitor2.position = center + 100*xhat
+orbitor2.velocity = 50*yhat
+# orbitor2 object, non-default position and velocity
+orbitor3 = Object(mass=5.0, radius=5.0)
+orbitor3.position = center + 50*xhat
+orbitor3.velocity = 70*yhat
 
-radialArrow = Arrow(sun.position, orbitor.position)
-gameGrid = Grid(20,20)
-earthTrail = Trail()
-earthTrail.addPoint(orbitor.position.copy())
+# *** ARROWS, GRIDS, AND TRAILS ***
+radialArrow = Arrow(sun.position, orbitor1.position)
+gameGrid = Grid(10,10)
+orbitorTrail1 = Trail()
+orbitorTrail1.addPoint(orbitor1.position.copy())
+orbitorTrail2 = Trail()
+orbitorTrail2.addPoint(orbitor2.position.copy())
+orbitorTrail3 = Trail()
+orbitorTrail3.addPoint(orbitor3.position.copy())
 
 # ***** GAME LOOP *****
 while running:
@@ -140,53 +151,49 @@ while running:
     # wipe away anything from the previous frame
     screen.fill("black")
 
-    currentPosition = orbitor.position.copy()
-    # add current position of the orbitor to the Trail object array every 20 frames
+    currentPosition1 = orbitor1.position.copy()
+    currentPosition2 = orbitor2.position.copy()
+    currentPosition3 = orbitor3.position.copy()
+    # add current position of the orbitor1 to the Trail object array every 20 frames
     if (frame % 5 == 0):
-        earthTrail.addPoint(currentPosition)
+        orbitorTrail1.addPoint(currentPosition1)
+        orbitorTrail2.addPoint(currentPosition2)
+        orbitorTrail3.addPoint(currentPosition3)
 
     # *** RENDER THE GAME HERE ***
+    # draw all objects, grid, and trails
     gameGrid.draw(screen, "dark grey", 1)
-    earthTrail.draw(screen, "green", 1)
-
-    if (inFront):
-        sun.draw(screen, "yellow")
-        orbitor.draw(screen, "blue")
-    else:   
-        orbitor.draw(screen, "blue")
-        sun.draw(screen, "yellow")
-
-    radialArrow.setTailToTip(sun.position, orbitor.position)
-    radialArrow.draw(screen, "red", 3)
+    orbitorTrail1.draw(screen, "green", 1)
+    orbitorTrail2.draw(screen, "green", 1)
+    orbitorTrail3.draw(screen, "green", 1)
+    orbitor1.draw(screen, "blue")
+    orbitor2.draw(screen, "orange")
+    orbitor3.draw(screen, "red")
+    sun.draw(screen, "yellow")
     
     # force points from circle position to the center
-    rVec = (orbitor.position - sun.position)
-    distanceTo = rVec.magnitude()
-    rhat = rVec / distanceTo
+    r1 = (orbitor1.position - sun.position)
+    rhat1 = r1 / r1.magnitude()
+    r2 = (orbitor2.position - sun.position)
+    rhat2 = r2 / r2.magnitude()
+    r3 = (orbitor3.position - sun.position)
+    rhat3 = r3 / r3.magnitude()
+    
+    orbitor1.force = -((GRAV * sun.MASS * orbitor1.MASS) / (r1.magnitude() * r1.magnitude())) * rhat1
+    orbitor2.force = -((GRAV * sun.MASS * orbitor2.MASS) / (r2.magnitude() * r2.magnitude())) * rhat2
+    orbitor3.force = -((GRAV * sun.MASS * orbitor3.MASS) / (r3.magnitude() * r3.magnitude())) * rhat3
 
-    if (distanceTo > sun.RADIUS):
-        orbitor.force = -((GRAV * sun.MASS * orbitor.MASS) / (distanceTo * distanceTo)) * rhat
-
-    # update acceleration, velocity, and position
-    VxBefore = orbitor.velocity.x
-    orbitor.update(dt)
-    VxAfter = orbitor.velocity.x
-
-    # IF NECESSARY, reverse direction at edges
-    #if ( (orbitor.position.y - orbitor.RADIUS) < 0 or (orbitor.position.y + orbitor.RADIUS) > screen.get_height()):
-    #    orbitor.velocity.y *= -1   # reverse velocity y component
-    #if ( (orbitor.position.x - orbitor.RADIUS) < 0 or (orbitor.position.x + orbitor.RADIUS) > screen.get_width()):
-    #    orbitor.velocity.x *= -1   # reverse velocity x component
+    # update acceleration, velocity, and position of each orbitor (NOT the sun... assuming Keplerian Limit M >> m)
+    orbitor1.update(dt)
+    orbitor2.update(dt)
+    orbitor3.update(dt)
 
     # flip() display to send work to the screen
     pygame.display.flip()
 
     # limit to 60 fps
     dt = clock.tick(60) / 1000
+    print(dt)
     frame += 1
-
-    # trigger the flipping of "inFront" when the x component of velocity changes sign
-    if (VxBefore * VxAfter < 0):
-        inFront = not inFront
 
 pygame.quit()
