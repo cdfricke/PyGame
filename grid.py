@@ -1,7 +1,7 @@
 # File: grid.py
 # Programmer: Connor Fricke (cd.fricke23@gmail.com)
 # Last Revision:
-#   5-MARCH-2024 --> Created, v1
+#   MARCH 2024 --> Created, v1
 #
 # TODO:
 #   - add moving object with radial position vector visualized
@@ -42,8 +42,8 @@ class Arrow:
         # central body
         pygame.draw.line(surface=surface, color=color, start_pos=self.tail, end_pos=self.tip, width=thickness)
         # angled tip
-        leftAngled = (0.98 * self.length * self.direction) + (0.02 * self.length * self.perpendicular)
-        rightAngled = (0.98 * self.length * self.direction) - (0.02 * self.length * self.perpendicular)
+        leftAngled = self.tail + (0.98 * self.length * self.direction) + (0.02 * self.length * self.perpendicular)
+        rightAngled = self.tail + (0.98 * self.length * self.direction) - (0.02 * self.length * self.perpendicular)
         points = [leftAngled, self.tip, rightAngled]
         pygame.draw.lines(surface=surface, color=color, closed=False, points=points, width=thickness)
 
@@ -69,7 +69,7 @@ class Grid:
 
 # rows, cols
 gameMap = Grid(3, 3)
-centerArrow = Arrow(origin, center - 300*xhat)
+centerArrow = Arrow(origin , center - 300*xhat)
 
 
 # *** GAME LOOP ***

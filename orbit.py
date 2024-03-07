@@ -10,29 +10,77 @@
 #   - Correct behavior of gravity for very small r
 #   - Add some GUI stuff
 
+# *** INITIALIZE ***
 import pygame
-HEIGHT = 720
 WIDTH = 720
-#pygame initialization boilerplate
+HEIGHT = 720
 pygame.init()
-screen = pygame.display.set_mode((WIDTH,HEIGHT))
+screen = pygame.display.set_mode((WIDTH+1, HEIGHT+1))
 clock = pygame.time.Clock()
+running = True
+inFront = True
+dt = 0
+frame = 0
+GRAV = 50.0
+# ******************
 
-# necessary misc variables to keep track of
-running = True  # for game loop
-dt = 0          # for framerate independent physics
-GRAV = 50.0     # gravitational constant, increasing this increases "strength" of gravity
-inFront = True  # to decide which object to draw "on top"
-frame = 0       # to keep track of frame number
+# *** COMMON VECTORS AND LOCATIONS ***
 
-# ***** VECTORS AND REFERENCE POINTS *****
-# NOTE: in PyGame, the origin is the top left corner of the screen
-xhat = pygame.Vector2(1.0, 0.0)     # DIRECTION: RIGHT
-yhat = pygame.Vector2(0.0, 1.0)     # DIRECTION: DOWN
-zero = pygame.Vector2(0.0, 0.0)     # ZERO VECTOR
-center = pygame.Vector2(WIDTH / 2.0, HEIGHT / 2.0)  # DEFINED CENTER OF THE SCREEN
+center = pygame.Vector2(WIDTH / 2, HEIGHT / 2)
+zero = pygame.Vector2(0, 0)
+origin = zero
+xhat = pygame.Vector2(1, 0)
+yhat = pygame.Vector2(0, 1)
 
-# ***** CLASS DEFINITION *****
+# ************************************
+
+# *** CLASS DEFINITIONS ***
+# NOTE THAT THESE CLASS DEFINITIONS RELY ON SOME OF THE DEFINED VARIABLES ABOVE
+
+# ARROW : class object for drawing arrows between positions on the screen.
+class Arrow:
+    def __init__(self, tail, tip):
+        self.tip = tip
+        self.tail = tail
+        self.length = (tip - tail).magnitude()
+        self.direction = (tip - tail) / self.length
+        self.perpendicular = pygame.Vector2(self.direction.y, -self.direction.x)
+
+    def draw(self, surface, color, thickness):
+        # central body
+        pygame.draw.line(surface=surface, color=color, start_pos=self.tail, end_pos=self.tip, width=thickness)
+        # angled tip
+        leftAngled = self.tail + (0.9 * self.length * self.direction) + (0.1 * self.length * self.perpendicular)
+        rightAngled = self.tail + (0.9 * self.length * self.direction) - (0.1 * self.length * self.perpendicular)
+        points = [leftAngled, self.tip, rightAngled]
+        pygame.draw.lines(surface=surface, color=color, closed=False, points=points, width=thickness)
+
+    # same as constructor just allows us to manipulate the arrow after the object is constructed
+    def setTailToTip(self, tail, tip):
+        self.tip = tip
+        self.tail = tail
+        self.length = (tip - tail).magnitude()
+        self.direction = (tip - tail) / self.length
+        self.perpendicular = pygame.Vector2(self.direction.y, -self.direction.x)
+
+# GRID: class object for drawing a grid with a certain number of rows and columns on the screen.
+class Grid:
+    def __init__(self, rows, columns):
+        self.numRows = rows
+        self.numCols = columns
+        self.xticks = list(range(0, WIDTH + 1, int(WIDTH / columns)))
+        self.yticks = list(range(0, HEIGHT + 1, int(HEIGHT / rows)))
+    
+    def draw(self, surface, color, thickness):
+        for tick in self.xticks:
+            start = tick*xhat
+            end = start + HEIGHT*yhat
+            pygame.draw.line(surface=surface, color=color, start_pos=start, end_pos=end, width=thickness)
+        for tick in self.yticks:
+            start = tick*yhat
+            end = start + WIDTH*xhat
+            pygame.draw.line(surface=surface, color=color, start_pos=start, end_pos=end, width=thickness)
+
 class Object:
     """This is the base object of my game. It is drawn in game as a circle"""
     def __init__(self, radius, mass, color):
@@ -42,7 +90,7 @@ class Object:
         self.COLOR = color
         # variables
         self.position = center          # set position at middle of screen
-        self.velocity = zero            # set velocity to zero
+        self.velocity = origin            # set velocity to zero
         self.acceleration = zero        # set acceleration to zero
         self.force = zero               # this is the force that the current object "feels"
 
@@ -55,11 +103,8 @@ class Object:
         self.acceleration = self.force / self.MASS
         self.velocity += self.acceleration
         self.position += self.velocity * deltaTime
-    
-    #def getForce(self, objectArray):
-    #    for obj in objectArray:
-    #        radialVec = obj.position - self.position
-    #        self.force += radialVec
+        
+# *************************
 
 # ***** INITIAL CONDITIONS *****
 STARTVEL = (50*xhat) + (50*yhat)
@@ -72,6 +117,8 @@ orbitor.velocity = STARTVEL
 
 # sun object, default position and velocity (centered, zero)
 sun = Object(mass=100.0, color="yellow",radius=20.0)
+
+radialArrow = Arrow(sun.position, orbitor.position)
 
 # ***** GAME LOOP *****
 while running:
@@ -91,6 +138,9 @@ while running:
         orbitor.draw()
         sun.draw()
 
+    radialArrow.setTailToTip(sun.position, orbitor.position)
+    radialArrow.draw(screen, "white", 3)
+    
     # force points from circle position to the center
     rVec = (orbitor.position - sun.position)
     distanceTo = rVec.magnitude()
