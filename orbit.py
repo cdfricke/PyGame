@@ -101,8 +101,9 @@ class Object:
         self.position += self.velocity * deltaTime
 
 class Trail:
-    def __init__(self):
+    def __init__(self, maxlength):
         self.pointArray = []
+        self.maxlength = maxlength
         
     def draw(self, surface, color, width):
         pygame.draw.aalines(surface=surface, color=color, closed=False, points=self.pointArray, blend=1)
@@ -110,7 +111,7 @@ class Trail:
     def addPoint(self, point):
         self.pointArray.append(point)
         # limit trail length to N points (N should be determined based on the orbit length)
-        if (len(self.pointArray) > 600):
+        if (len(self.pointArray) > self.maxlength):
             self.pointArray.pop(0)
         
 # *************************
@@ -134,11 +135,11 @@ orbitor3.velocity = 70*yhat
 # *** ARROWS, GRIDS, AND TRAILS ***
 radialArrow = Arrow(sun.position, orbitor1.position)
 gameGrid = Grid(10,10)
-orbitorTrail1 = Trail()
+orbitorTrail1 = Trail(600)
 orbitorTrail1.addPoint(orbitor1.position.copy())
-orbitorTrail2 = Trail()
+orbitorTrail2 = Trail(300)
 orbitorTrail2.addPoint(orbitor2.position.copy())
-orbitorTrail3 = Trail()
+orbitorTrail3 = Trail(100)
 orbitorTrail3.addPoint(orbitor3.position.copy())
 
 # ***** GAME LOOP *****
