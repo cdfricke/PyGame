@@ -79,6 +79,7 @@ class Grid:
             end = start + WIDTH*xhat
             pygame.draw.line(surface=surface, color=color, start_pos=start, end_pos=end, width=thickness)
 
+
 class Object:
     """This is the base object of my game. It is drawn in game as a circle"""
     def __init__(self, radius, mass):
@@ -106,7 +107,7 @@ class Trail:
         self.pointArray = []
         
     def draw(self, surface, color, width):
-        pygame.draw.lines(surface=surface, color=color, closed=False, points=self.pointArray, width=width)
+        pygame.draw.aalines(surface=surface, color=color, closed=False, points=self.pointArray, blend=1)
 
     def addPoint(self, point):
         self.pointArray.append(point)
