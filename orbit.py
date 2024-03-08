@@ -33,9 +33,9 @@ yhat = pygame.Vector2(0, 1)
 
 # *** HELPER FUNCTIONS ***
 def colorFunction(x, xmax):
-    r = int(float(x)/float(xmax) * 100)
+    r = int(float(x)/float(xmax) * 60)
     g = 0
-    b = int(float(x)/float(xmax) * 100)
+    b = int(float(x)/float(xmax) * 60)
     return pygame.Color(r, g, b)
 
 # *** CLASS DEFINITIONS ***
@@ -183,7 +183,7 @@ while running:
     
     # GRID
     gameGrid.drawRectangles(screen)
-    gameGrid.drawLines(screen, "dark grey", 1)
+    #gameGrid.drawLines(screen, "dark grey", 1)
 
     # TRAILS
     orbitorTrail1.draw(screen, "green", 1)
