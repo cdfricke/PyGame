@@ -1,12 +1,13 @@
 # File: grid.py
 # Programmer: Connor Fricke (cd.fricke23@gmail.com)
 # Last Revision:
-#   MARCH 2024 --> Created, v1
+#   4-MAR-2024 --> Created, v1
+#   7-MAR-2024 --> added grid colors
 #
-# TODO:
-#   - add moving object with radial position vector visualized
+# ************************************************
 
 import pygame
+import random as r
 
 # *** INITIALIZE ***
 WIDTH = 720
@@ -18,13 +19,17 @@ running = True
 # ******************
 
 # *** COMMON VECTORS AND LOCATIONS ***
-
 center = pygame.Vector2(WIDTH / 2, HEIGHT / 2)
 origin = pygame.Vector2(0, 0)
 xhat = pygame.Vector2(1, 0)
 yhat = pygame.Vector2(0, 1)
-
 # ************************************
+
+def colorFunction(x, xmax):
+    r = int(float(x)/float(xmax) * 100)
+    g = 0
+    b = int(float(x)/float(xmax) * 100)
+    return pygame.Color(r, g, b)
 
 # *** CLASS DEFINITIONS ***
 # NOTE THAT THESE CLASS DEFINITIONS RELY ON SOME OF THE DEFINED VARIABLES ABOVE
@@ -54,8 +59,9 @@ class Grid:
         self.numCols = columns
         self.xticks = list(range(0, WIDTH + 1, int(WIDTH / columns)))
         self.yticks = list(range(0, HEIGHT + 1, int(HEIGHT / rows)))
+        self.Matrix = [[r.random() for x in range(columns)] for y in range(rows)]
     
-    def draw(self, surface, color, thickness):
+    def drawLines(self, surface, color, thickness):
         for tick in self.xticks:
             start = tick*xhat
             end = start + HEIGHT*yhat
@@ -64,13 +70,17 @@ class Grid:
             start = tick*yhat
             end = start + WIDTH*xhat
             pygame.draw.line(surface=surface, color=color, start_pos=start, end_pos=end, width=thickness)
-        
+            
+    def drawRectangles(self, surface):
+        for x in range(0, self.numCols):
+            for y in range(0, self.numRows):
+                rect = pygame.Rect(self.xticks[x], self.yticks[y], WIDTH / self.numCols, HEIGHT / self.numRows)
+                pygame.draw.rect(surface, colorFunction(self.Matrix[x][y], 1), rect)
+
 # *************************
 
 # rows, cols
-gameMap = Grid(3, 3)
-centerArrow = Arrow(origin , center - 300*xhat)
-
+gameMap = Grid(20, 20)
 
 # *** GAME LOOP ***
 while (running):
@@ -78,8 +88,8 @@ while (running):
     screen.fill("black")
 
     # *** RENDER THE GAME HERE ***
-    gameMap.draw(screen, "white", 1)
-    centerArrow.draw(screen, "white", 3)
+    gameMap.drawRectangles(screen)
+    #gameMap.drawLines(screen, "white", 3)
 
     # *** END RENDERING ***
 
@@ -90,5 +100,5 @@ while (running):
 
     pygame.display.flip()
 # *****************
-    
+
 pygame.quit()

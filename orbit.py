@@ -8,6 +8,7 @@
 
 # *** INITIALIZE ***
 import pygame
+import random as r
 WIDTH = 720
 HEIGHT = 720
 pygame.init()
@@ -29,6 +30,13 @@ xhat = pygame.Vector2(1, 0)
 yhat = pygame.Vector2(0, 1)
 
 # ************************************
+
+# *** HELPER FUNCTIONS ***
+def colorFunction(x, xmax):
+    r = int(float(x)/float(xmax) * 100)
+    g = 0
+    b = int(float(x)/float(xmax) * 100)
+    return pygame.Color(r, g, b)
 
 # *** CLASS DEFINITIONS ***
 # NOTE THAT THESE CLASS DEFINITIONS RELY ON SOME OF THE DEFINED VARIABLES ABOVE
@@ -66,8 +74,9 @@ class Grid:
         self.numCols = columns
         self.xticks = list(range(0, WIDTH + 1, int(WIDTH / columns)))
         self.yticks = list(range(0, HEIGHT + 1, int(HEIGHT / rows)))
+        self.Matrix = [[r.random() for x in range(columns)] for y in range(rows)]
     
-    def draw(self, surface, color, thickness):
+    def drawLines(self, surface, color, thickness):
         for tick in self.xticks:
             start = tick*xhat
             end = start + HEIGHT*yhat
@@ -76,6 +85,12 @@ class Grid:
             start = tick*yhat
             end = start + WIDTH*xhat
             pygame.draw.line(surface=surface, color=color, start_pos=start, end_pos=end, width=thickness)
+            
+    def drawRectangles(self, surface):
+        for x in range(0, self.numCols):
+            for y in range(0, self.numRows):
+                rect = pygame.Rect(self.xticks[x], self.yticks[y], WIDTH / self.numCols, HEIGHT / self.numRows)
+                pygame.draw.rect(surface, colorFunction(self.Matrix[x][y], 1), rect)
 
 
 class Object:
@@ -133,8 +148,8 @@ orbitor3.position = center + 50*xhat
 orbitor3.velocity = 70*yhat
 
 # *** ARROWS, GRIDS, AND TRAILS ***
-radialArrow = Arrow(sun.position, orbitor1.position)
-gameGrid = Grid(10,10)
+radialArrow = Arrow(sun.position, orbitor3.position)
+gameGrid = Grid(72,72)
 orbitorTrail1 = Trail(600)
 orbitorTrail1.addPoint(orbitor1.position.copy())
 orbitorTrail2 = Trail(300)
@@ -160,18 +175,33 @@ while running:
         orbitorTrail1.addPoint(currentPosition1)
         orbitorTrail2.addPoint(currentPosition2)
         orbitorTrail3.addPoint(currentPosition3)
+    
+    # set arrow data
+    radialArrow.setTailToTip(sun.position, orbitor3.position)
 
-    # *** RENDER THE GAME HERE ***
-    # draw all objects, grid, and trails
-    gameGrid.draw(screen, "dark grey", 1)
+    # ***** RENDER THE GAME HERE *****
+    
+    # GRID
+    gameGrid.drawRectangles(screen)
+    gameGrid.drawLines(screen, "dark grey", 1)
+
+    # TRAILS
     orbitorTrail1.draw(screen, "green", 1)
     orbitorTrail2.draw(screen, "green", 1)
     orbitorTrail3.draw(screen, "green", 1)
+
+    # ORBITORS
     orbitor1.draw(screen, "blue")
     orbitor2.draw(screen, "orange")
     orbitor3.draw(screen, "red")
+
+    # SUN
     sun.draw(screen, "yellow")
+
+    # ARROWS
+    radialArrow.draw(screen, "white", 3)
     
+    # CALCULATE FORCES
     # force points from circle position to the center
     r1 = (orbitor1.position - sun.position)
     rhat1 = r1 / r1.magnitude()
@@ -194,7 +224,7 @@ while running:
 
     # limit to 60 fps
     dt = clock.tick(60) / 1000
-    print(dt)
+    print(int(1/dt))
     frame += 1
 
 pygame.quit()
