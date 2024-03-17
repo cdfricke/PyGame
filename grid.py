@@ -17,6 +17,9 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH+1, HEIGHT+1))
 clock = pygame.time.Clock()
 running = True
+frame = 0
+dt = 0          # for framerate independent physics
+totalT = 0
 # ******************
 
 # *** COMMON VECTORS AND LOCATIONS ***
@@ -52,7 +55,7 @@ def colorFunction3(x):
     return pygame.Color(r, g, b)
 
 # red -> blue
-def colorFunction3(x):
+def colorFunction4(x):
     # r,g,b values must be integers between 0 and 255
     r = 255 - int(float(x) * 255)
     g = 0
@@ -127,12 +130,12 @@ class Grid:
     def fillMatrix(self):
         for y in range(self.numRows):
             for x in range(self.numCols):
-                self.Matrix[y][x] = (float(y / self.numRows) + float(x / self.numCols)) / 2
+                self.Matrix[y][x] = float(y / self.numRows)
 
 # *************************
 
 # rows, cols
-gameMap = Grid(20, 20)
+gameMap = Grid(720, 1)
 gameMap.fillMatrix()
 
 # *** GAME LOOP ***
@@ -141,8 +144,15 @@ while (running):
     screen.fill("black")
 
     # *** RENDER THE GAME HERE ***
-    gameMap.drawRectangles(screen, colorFunction3)
-    gameMap.drawLines(screen, "white", 3)
+    if ( int(totalT) < 5):
+        gameMap.drawRectangles(screen, colorFunction1)
+    elif ( int(totalT) < 10):
+        gameMap.drawRectangles(screen, colorFunction2)
+    elif ( int(totalT < 15) ):
+        gameMap.drawRectangles(screen, colorFunction3)
+    else:
+        gameMap.drawRectangles(screen, colorFunction4)
+    #gameMap.drawLines(screen, "white", 10)
 
     # *** END RENDERING ***
 
@@ -152,6 +162,8 @@ while (running):
             running = False
 
     pygame.display.flip()
+    dt = clock.tick(60) / 1000
+    totalT += dt
 # *****************
 
 pygame.quit()
