@@ -50,6 +50,14 @@ def colorFunction3(x):
     g = 0
     b = 0
     return pygame.Color(r, g, b)
+
+# red -> blue
+def colorFunction3(x):
+    # r,g,b values must be integers between 0 and 255
+    r = 255 - int(float(x) * 255)
+    g = 0
+    b = int(float(x) * 255)
+    return pygame.Color(r, g, b)
 # ***********************************
 
 # *** CLASS DEFINITIONS ***
@@ -133,7 +141,7 @@ while (running):
     screen.fill("black")
 
     # *** RENDER THE GAME HERE ***
-    gameMap.drawRectangles(screen, colorFunction2)
+    gameMap.drawRectangles(screen, colorFunction3)
     gameMap.drawLines(screen, "white", 3)
 
     # *** END RENDERING ***
