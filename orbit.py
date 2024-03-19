@@ -8,7 +8,10 @@
 
 # *** INITIALIZE ***
 import pygame
-import random as r
+from grid import *
+from colors import *
+from arrow import Arrow
+
 WIDTH = 720
 HEIGHT = 720
 pygame.init()
@@ -31,67 +34,8 @@ yhat = pygame.Vector2(0, 1)
 
 # ************************************
 
-# *** HELPER FUNCTIONS ***
-def colorFunction(x, xmax):
-    r = int(float(x)/float(xmax) * 60)
-    g = 0
-    b = int(float(x)/float(xmax) * 60)
-    return pygame.Color(r, g, b)
-
 # *** CLASS DEFINITIONS ***
 # NOTE THAT THESE CLASS DEFINITIONS RELY ON SOME OF THE DEFINED VARIABLES ABOVE
-
-# ARROW : class object for drawing arrows between positions on the screen.
-class Arrow:
-    def __init__(self, tail, tip):
-        self.tip = tip
-        self.tail = tail
-        self.length = (tip - tail).magnitude()
-        self.direction = (tip - tail) / self.length
-        self.perpendicular = pygame.Vector2(self.direction.y, -self.direction.x)
-
-    def draw(self, surface, color, thickness):
-        # central body
-        pygame.draw.line(surface=surface, color=color, start_pos=self.tail, end_pos=self.tip, width=thickness)
-        # angled tip
-        leftAngled = self.tail + (0.9 * self.length * self.direction) + (0.1 * self.length * self.perpendicular)
-        rightAngled = self.tail + (0.9 * self.length * self.direction) - (0.1 * self.length * self.perpendicular)
-        points = [leftAngled, self.tip, rightAngled]
-        pygame.draw.lines(surface=surface, color=color, closed=False, points=points, width=thickness)
-
-    # same as constructor just allows us to manipulate the arrow after the object is constructed
-    def setTailToTip(self, tail, tip):
-        self.tip = tip
-        self.tail = tail
-        self.length = (tip - tail).magnitude()
-        self.direction = (tip - tail) / self.length
-        self.perpendicular = pygame.Vector2(self.direction.y, -self.direction.x)
-
-# GRID: class object for drawing a grid with a certain number of rows and columns on the screen.
-class Grid:
-    def __init__(self, rows, columns):
-        self.numRows = rows
-        self.numCols = columns
-        self.xticks = list(range(0, WIDTH + 1, int(WIDTH / columns)))
-        self.yticks = list(range(0, HEIGHT + 1, int(HEIGHT / rows)))
-        self.Matrix = [[r.random() for x in range(columns)] for y in range(rows)]
-    
-    def drawLines(self, surface, color, thickness):
-        for tick in self.xticks:
-            start = tick*xhat
-            end = start + HEIGHT*yhat
-            pygame.draw.line(surface=surface, color=color, start_pos=start, end_pos=end, width=thickness)
-        for tick in self.yticks:
-            start = tick*yhat
-            end = start + WIDTH*xhat
-            pygame.draw.line(surface=surface, color=color, start_pos=start, end_pos=end, width=thickness)
-            
-    def drawRectangles(self, surface):
-        for x in range(0, self.numCols):
-            for y in range(0, self.numRows):
-                rect = pygame.Rect(self.xticks[x], self.yticks[y], WIDTH / self.numCols, HEIGHT / self.numRows)
-                pygame.draw.rect(surface, colorFunction(self.Matrix[x][y], 1), rect)
-
 
 class Object:
     """This is the base object of my game. It is drawn in game as a circle"""
@@ -149,7 +93,7 @@ orbitor3.velocity = 70*yhat
 
 # *** ARROWS, GRIDS, AND TRAILS ***
 radialArrow = Arrow(sun.position, orbitor3.position)
-gameGrid = Grid(72,72)
+gameGrid = Grid(10,10, WIDTH, HEIGHT)
 orbitorTrail1 = Trail(600)
 orbitorTrail1.addPoint(orbitor1.position.copy())
 orbitorTrail2 = Trail(300)
@@ -177,13 +121,13 @@ while running:
         orbitorTrail3.addPoint(currentPosition3)
     
     # set arrow data
-    radialArrow.setTailToTip(sun.position, orbitor3.position)
+    radialArrow.update(sun.position, orbitor3.position)
 
     # ***** RENDER THE GAME HERE *****
     
     # GRID
-    gameGrid.drawRectangles(screen)
-    #gameGrid.drawLines(screen, "dark grey", 1)
+    gameGrid.drawRectangles(screen, colorFunction1)
+    gameGrid.drawLines(screen, "white", 1)
 
     # TRAILS
     orbitorTrail1.draw(screen, "green", 1)

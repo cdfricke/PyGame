@@ -4,23 +4,6 @@
 #   17-MAR-2024 --> Created, v1
 
 import pygame
-import random as r
-
-# *** INITIALIZE ***
-WIDTH = 720
-HEIGHT = 720
-pygame.init()
-screen = pygame.display.set_mode((WIDTH+1, HEIGHT+1))
-clock = pygame.time.Clock()
-running = True
-# ******************
-
-# *** COMMON VECTORS AND LOCATIONS ***
-center = pygame.Vector2(WIDTH / 2, HEIGHT / 2)
-origin = pygame.Vector2(0, 0)
-xhat = pygame.Vector2(1, 0)
-yhat = pygame.Vector2(0, 1)
-# ************************************
 
 # *** CLASS DEFINITIONS ***
 # NOTE THAT THESE CLASS DEFINITIONS RELY ON SOME OF THE DEFINED VARIABLES ABOVE
@@ -58,8 +41,8 @@ class Arrow:
         # central body
         pygame.draw.line(surface=surface, color=color, start_pos=self.tail, end_pos=self.tip, width=thickness)
         # angled tip
-        leftAngled = self.tail + (0.98 * self.length * self.direction) + (0.02 * self.length * self.perpendicular)
-        rightAngled = self.tail + (0.98 * self.length * self.direction) - (0.02 * self.length * self.perpendicular)
+        leftAngled = self.tail + (0.9 * self.length * self.direction) + (0.1 * self.length * self.perpendicular)
+        rightAngled = self.tail + (0.9 * self.length * self.direction) - (0.1 * self.length * self.perpendicular)
         points = [leftAngled, self.tip, rightAngled]
         pygame.draw.lines(surface=surface, color=color, closed=False, points=points, width=thickness)
 
@@ -78,28 +61,3 @@ class Arrow:
         self.perpendicular = pygame.Vector2(self.direction.y, -self.direction.x)
 
 # *************************************
-
-# create arrow object, defined as Arrow(tail, tip)
-centerArrow = Arrow(origin, center)
-
-# *** GAME LOOP ***
-while (running):
-    # wipe away anything from the previous frame
-    screen.fill("black")
-
-    # *** RENDER THE GAME HERE ***
-    # draw arrow, but each frame update the tip of the arrow up a pixel, down a pixel, or not at all.
-    # After an infinite amount of time, the avg location of the tip should be very near the center if randint() is truly random.
-    centerArrow.draw(screen, "white", 5)
-    centerArrow.update(origin, centerArrow.tip + r.randint(-1, 1)*yhat)
-    # *** END RENDERING ***
-
-    # pygame.QUIT means the user closed the window
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    pygame.display.flip()
-# *****************
-
-pygame.quit()
