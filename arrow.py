@@ -45,12 +45,12 @@ class Arrow:
         tail to tip. As long as the percentanges add up to 1 (e.g. 98% + 2%), the arrowhead will make 45 degree angles with the body of the arrow.
         """
         # central body
-        pygame.draw.line(surface=surface, color=color, start_pos=self.tail, end_pos=self.tip, width=thickness)
+        pygame.draw.aaline(surface=surface, color=color, start_pos=self.tail, end_pos=self.tip, blend=thickness)
         # angled tip
         leftAngled = self.tail + (0.9 * self.length * self.direction) + (0.1 * self.length * self.perpendicular)
         rightAngled = self.tail + (0.9 * self.length * self.direction) - (0.1 * self.length * self.perpendicular)
         points = [leftAngled, self.tip, rightAngled]
-        pygame.draw.lines(surface=surface, color=color, closed=False, points=points, width=thickness)
+        pygame.draw.aalines(surface=surface, color=color, closed=False, points=points, blend=thickness)
 
     
     def update(self, tail, tip):

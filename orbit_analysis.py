@@ -9,20 +9,19 @@
 #   - add plotting of data
 #   - use real values (real gravitational constant, more realistic masses and separations)
 
-# *** INITIALIZE ***
+# libraries for analysis
+import matplotlib.pyplot as plt
 import pygame
 # my classes
 from trail import *
 from arrow import *
+from math import atan
 
-# libraries for analysis
-import matplotlib.pyplot as plt
-import numpy as np
-
+# *** INITIALIZE ***
 times = []
 velocities = []
-
-WIDTH = 720
+momentums = []
+WIDTH = 1000
 HEIGHT = 720
 pygame.init()
 screen = pygame.display.set_mode((WIDTH+1, HEIGHT+1))
@@ -31,26 +30,26 @@ running = True
 dt = 0
 frame = 0
 simulationTime = 0
+angularMomentum = 0
+halfPeriodCounter = 0
 # ******************
 
-# *** CONSTANTS ***
-GRAV = 6.674E-11 # N m^2 kg^-2
-SUN_MASS = 6.5e15 # kg
-RATE = 3
-
 # *** COMMON VECTORS AND LOCATIONS ***
-
 center = pygame.Vector2(WIDTH / 2, HEIGHT / 2)
 zero = pygame.Vector2(0, 0)
 origin = zero
 xhat = pygame.Vector2(1, 0)
 yhat = pygame.Vector2(0, 1)
+# ******************
 
-# ************************************
+# *** CONSTANTS ***
+GRAV = 6.674E-11 # N m^2 kg^-2
+SUN_MASS = 6.5e15 # kg
+INITIAL_POS = center + 250*xhat
+RATE = 10
+# ******************
 
-# *** CLASS DEFINITIONS ***
-# NOTE THAT THESE CLASS DEFINITIONS RELY ON SOME OF THE DEFINED VARIABLES ABOVE
-
+# *** OBJECT CLASS ***
 class Object:
     """This is the base object of the simulation. It is drawn in the window as a circle"""
     def __init__(self, radius, mass):
@@ -71,24 +70,23 @@ class Object:
         # v_f = v_0 + at
         self.velocity += self.acceleration * deltaTime
         # x_f = x_0 + vt
-        self.position += self.velocity * deltaTime
-        
+        self.position += self.velocity * deltaTime     
 # *************************
 
-# ***** INITIAL CONDITIONS *****
-        
+# ***** INITIAL CONDITIONS *****  
 # sun object, default position and velocity
 sun = Object(mass=SUN_MASS, radius=20.0)
 # orbitor1 object, non-default position and velocity
 orbitor1 = Object(mass=5.0, radius=10.0)
-orbitor1.position = center + 250*xhat
-orbitor1.velocity = 31*yhat
+orbitor1.position = INITIAL_POS
+orbitor1.velocity = 45*yhat
+# ******************
 
 # *** ARROWS, GRIDS, AND TRAILS ***
-orbitorTrail1 = Trail(1200)
+orbitorTrail1 = Trail(1575)
 orbitorTrail1.addPoint(orbitor1.position.copy())
-
 accelArrow = Arrow(orbitor1.position, orbitor1.position - xhat)
+# ******************
 
 # ***** GAME LOOP *****
 while running:
@@ -111,11 +109,20 @@ while running:
     # a = GM/r^2 (in the negative radial direction)
     orbitor1.acceleration = -((GRAV * sun.MASS) / (radius.magnitude() * radius.magnitude())) * rhat
 
+    # L = mvr
+    angularMomentum = orbitor1.MASS * orbitor1.velocity.magnitude() * radius.magnitude()
+
     # once we have the acceleration, we can decide how to draw the acceleration arrow
-    accelArrow.update(orbitor1.position, orbitor1.position + orbitor1.acceleration*1.5)
+    accelArrow.update(orbitor1.position, orbitor1.position + orbitor1.acceleration*5)
 
     # update acceleration, velocity, and position of each orbitor (NOT the sun... assuming Keplerian Limit M >> m)
+    vBefore = orbitor1.velocity.copy()
     orbitor1.update(RATE*dt)
+    vAfter = orbitor1.velocity.copy()
+    if (vBefore.x*vAfter.x < 0):
+        halfPeriodCounter += 1
+        period = simulationTime * 2 / halfPeriodCounter
+        print("Orbital Period:", round(period, 2), "seconds.")
 
     # ***** RENDER THE GAME HERE *****
     # TRAIL
@@ -124,7 +131,7 @@ while running:
     orbitor1.draw(screen, "blue")
     sun.draw(screen, "yellow")
     # ARROW
-    accelArrow.draw(screen, "white", 3)
+    accelArrow.draw(screen, "white", 1)
 
     # flip() display to send work to the screen
     pygame.display.flip()
@@ -132,20 +139,21 @@ while running:
     # limit to 50 fps (dt ~ 0.02)
     dt = clock.tick(100) / 1000
     # track a couple things for use
-    simulationTime += dt
+    simulationTime += dt * RATE
     frame += 1
-    print(simulationTime)
     # add data to our times and velocities arrays to plot after the sim runs
     times.append(simulationTime)
-    velocities.append(-orbitor1.velocity.y)
+    velocities.append(orbitor1.velocity.magnitude())
+    momentums.append(angularMomentum)
 
 pygame.quit()
 
+# *** DATA ANALYSIS ***
 fig, ax = plt.subplots()
-ax.set_ylabel("$V_y$ (px $\\rm s^{-1}$)")
+ax.set_ylabel("$v$ (px $\\rm s^{-1}$)")
 ax.set_xlabel("Time (s)")
-ax.set_title("$V_y$ vs. time")
-
+ax.set_title("Velocity vs. time")
 ax.plot(times, velocities)
-
 plt.show()
+# ******************
+
