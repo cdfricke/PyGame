@@ -130,7 +130,7 @@ while running:
     pygame.display.flip()
 
     # limit to 50 fps (dt ~ 0.02)
-    dt = clock.tick(50) / 1000
+    dt = clock.tick(100) / 1000
     # track a couple things for use
     simulationTime += dt
     frame += 1
