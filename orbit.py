@@ -3,14 +3,21 @@
 # Last Revision:
 #   28-FEB-2024 ---> defined commonly used vectors, object class, initialized project
 #   29-FEB-2024 ---> defined gravity as inverse square law, assessed TODO list
+# 
+# The primary purpose of this script is to learn how to create classes in python and get familiar
+# with the PyGame module for simple visualizations and simulations. This script in particular demonstrates
+# the capabilities of the Grid, Arrow, and Trail classes, as well as the color functions from colors.py
 # TODO:
 #   - add some GUI stuff
+#   - do simulation calculations from array of orbitors
 
 # *** INITIALIZE ***
 import pygame
+# my classes
 from grid import *
 from colors import *
-from arrow import Arrow
+from arrow import *
+from trail import *
 
 WIDTH = 720
 HEIGHT = 720
@@ -22,6 +29,7 @@ inFront = True
 dt = 0
 frame = 0
 GRAV = 40.0
+simulationTime = 0
 # ******************
 
 # *** COMMON VECTORS AND LOCATIONS ***
@@ -38,7 +46,7 @@ yhat = pygame.Vector2(0, 1)
 # NOTE THAT THESE CLASS DEFINITIONS RELY ON SOME OF THE DEFINED VARIABLES ABOVE
 
 class Object:
-    """This is the base object of my game. It is drawn in game as a circle"""
+    """This is the base object of the simulation. It is drawn in the window as a circle"""
     def __init__(self, radius, mass):
         # constants
         self.RADIUS = radius
@@ -58,20 +66,6 @@ class Object:
         self.acceleration = self.force / self.MASS
         self.velocity += self.acceleration
         self.position += self.velocity * deltaTime
-
-class Trail:
-    def __init__(self, maxlength):
-        self.pointArray = []
-        self.maxlength = maxlength
-        
-    def draw(self, surface, color, width):
-        pygame.draw.aalines(surface=surface, color=color, closed=False, points=self.pointArray, blend=1)
-
-    def addPoint(self, point):
-        self.pointArray.append(point)
-        # limit trail length to N points (N should be determined based on the orbit length)
-        if (len(self.pointArray) > self.maxlength):
-            self.pointArray.pop(0)
         
 # *************************
 
@@ -93,7 +87,7 @@ orbitor3.velocity = 70*yhat
 
 # *** ARROWS, GRIDS, AND TRAILS ***
 radialArrow = Arrow(sun.position, orbitor3.position)
-gameGrid = Grid(10,10, WIDTH, HEIGHT)
+gameGrid = Grid(72,72, WIDTH, HEIGHT)
 orbitorTrail1 = Trail(600)
 orbitorTrail1.addPoint(orbitor1.position.copy())
 orbitorTrail2 = Trail(300)
@@ -127,12 +121,11 @@ while running:
     
     # GRID
     gameGrid.drawRectangles(screen, colorFunction1)
-    gameGrid.drawLines(screen, "white", 1)
 
     # TRAILS
-    orbitorTrail1.draw(screen, "green", 1)
-    orbitorTrail2.draw(screen, "green", 1)
-    orbitorTrail3.draw(screen, "green", 1)
+    orbitorTrail1.aadraw(screen, "green", 1)
+    orbitorTrail2.aadraw(screen, "green", 1)
+    orbitorTrail3.aadraw(screen, "green", 1)
 
     # ORBITORS
     orbitor1.draw(screen, "blue")
@@ -166,9 +159,11 @@ while running:
     # flip() display to send work to the screen
     pygame.display.flip()
 
-    # limit to 60 fps
-    dt = clock.tick(60) / 1000
-    print(int(1/dt))
+    # limit to 50 fps (dt ~ 0.02)
+    dt = clock.tick(50) / 1000
+    # track
+    simulationTime += dt
     frame += 1
+    print(simulationTime)
 
 pygame.quit()

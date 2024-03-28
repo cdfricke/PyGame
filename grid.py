@@ -42,6 +42,7 @@ class Grid:
         # initially, the matrix is populated with random values
         self.Matrix = [[random.random() for x in range(columns)] for y in range(rows)]
     
+
     def drawLines(self, surface, color, thickness):
         """
         Grid.drawLines(surface, color, thickness):
@@ -80,7 +81,7 @@ class Grid:
                 rect = pygame.Rect(self.xticks[x], self.yticks[y], self.width / self.numCols, self.height / self.numRows)
                 pygame.draw.rect(surface, colorFunc(self.Matrix[y][x]), rect)
 
-    
+
     def fillMatrix(self):
         """
         Grid.fillMatrix()
@@ -92,5 +93,3 @@ class Grid:
         for y in range(self.numRows):
             for x in range(self.numCols):
                 self.Matrix[y][x] = float(y / self.numRows)
-
-# *************************

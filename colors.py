@@ -32,4 +32,3 @@ def colorFunction4(x):
     g = 0
     b = int(float(x) * 255)
     return pygame.Color(r, g, b)
-# ***********************************
