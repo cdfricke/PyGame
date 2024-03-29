@@ -3,11 +3,11 @@
 # Last Revision:
 #   27-MARCH-2024 --> created
 #
-# Python script for simulation of a Keplerian orbit.
+# Python script for simulation of a Keplerian orbit. Mass units are kilograms, distance units are meters (1 px = 1 m)
 # TODO:
-#   - add GUI stuff to show some real-time data
 #   - add plotting of data
 #   - use real values (real gravitational constant, more realistic masses and separations)
+#   - create class for writing fonts and putting text to the screen
 
 # libraries for analysis
 import matplotlib.pyplot as plt
