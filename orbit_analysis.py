@@ -15,7 +15,8 @@ import pygame
 # my classes
 from trail import *
 from arrow import *
-from math import atan
+
+
 
 # *** INITIALIZE ***
 times = []
@@ -26,12 +27,14 @@ HEIGHT = 720
 pygame.init()
 screen = pygame.display.set_mode((WIDTH+1, HEIGHT+1))
 clock = pygame.time.Clock()
+consolas = pygame.font.SysFont(name="consolas", size=12, bold=True, italic=False)
 running = True
 dt = 0
 frame = 0
 simulationTime = 0
 angularMomentum = 0
 halfPeriodCounter = 0
+period = 0
 # ******************
 
 # *** COMMON VECTORS AND LOCATIONS ***
@@ -46,7 +49,7 @@ yhat = pygame.Vector2(0, 1)
 GRAV = 6.674E-11 # N m^2 kg^-2
 SUN_MASS = 6.5e15 # kg
 INITIAL_POS = center + 250*xhat
-RATE = 10
+RATE = 5
 # ******************
 
 # *** OBJECT CLASS ***
@@ -132,6 +135,15 @@ while running:
     sun.draw(screen, "yellow")
     # ARROW
     accelArrow.draw(screen, "white", 1)
+
+    # Render and display text
+    sunText = consolas.render("Hello World!", True, "white") # returns a surface object
+    earthText = consolas.render("Hello Sun!", True, "red")
+    orbitalPeriodText = consolas.render(f"Orbital Period: {round(period, 2)} seconds", True, "white")
+    # once we have our text surfaces, we must blit them to the screen
+    screen.blit(sunText, sun.position + 20*xhat - 20*yhat)
+    screen.blit(earthText, orbitor1.position + 20*xhat - 20*yhat)
+    screen.blit(orbitalPeriodText, 20*xhat + 20*yhat)
 
     # flip() display to send work to the screen
     pygame.display.flip()
