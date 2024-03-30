@@ -15,8 +15,7 @@ import pygame
 # my classes
 from trail import *
 from arrow import *
-
-
+from text import *
 
 # *** INITIALIZE ***
 times = []
@@ -27,7 +26,6 @@ HEIGHT = 720
 pygame.init()
 screen = pygame.display.set_mode((WIDTH+1, HEIGHT+1))
 clock = pygame.time.Clock()
-consolas = pygame.font.SysFont(name="consolas", size=12, bold=True, italic=False)
 running = True
 dt = 0
 frame = 0
@@ -91,6 +89,17 @@ orbitorTrail1.addPoint(orbitor1.position.copy())
 accelArrow = Arrow(orbitor1.position, orbitor1.position - xhat)
 # ******************
 
+# *** INITIALIZE TEXT ***
+periodData = Text()
+periodData.set_font("consolas", 12, True, False, "white")
+sunText = Text()
+sunText.set_font("consolas", 12, True, False, "white")
+sunText.text("Hello World!") # doesn't change throughout the sim, so we set the string here
+earthText = Text()
+earthText.set_font("consolas", 12, True, False, "red")
+earthText.text("Hello Sun!") # doesn't change throughout the sim, so we set the string here
+# ******************
+
 # ***** GAME LOOP *****
 while running:
     # pygame.QUIT means the user closed the window
@@ -125,7 +134,6 @@ while running:
     if (vBefore.x*vAfter.x < 0):
         halfPeriodCounter += 1
         period = simulationTime * 2 / halfPeriodCounter
-        print("Orbital Period:", round(period, 2), "seconds.")
 
     # ***** RENDER THE GAME HERE *****
     # TRAIL
@@ -136,14 +144,11 @@ while running:
     # ARROW
     accelArrow.draw(screen, "white", 1)
 
-    # Render and display text
-    sunText = consolas.render("Hello World!", True, "white") # returns a surface object
-    earthText = consolas.render("Hello Sun!", True, "red")
-    orbitalPeriodText = consolas.render(f"Orbital Period: {round(period, 2)} seconds", True, "white")
-    # once we have our text surfaces, we must blit them to the screen
-    screen.blit(sunText, sun.position + 20*xhat - 20*yhat)
-    screen.blit(earthText, orbitor1.position + 20*xhat - 20*yhat)
-    screen.blit(orbitalPeriodText, 20*xhat + 20*yhat)
+    # Render text at specified locations
+    periodData.text(f"Orbital Period: {round(period, 2)} seconds" + (" (Calculating...)" if period == 0 else ""))
+    periodData.render(screen, 20*xhat + 20*yhat)
+    sunText.render(screen, sun.position + 20*xhat - 20*yhat)
+    earthText.render(screen, orbitor1.position + 20*xhat - 20*yhat)
 
     # flip() display to send work to the screen
     pygame.display.flip()
