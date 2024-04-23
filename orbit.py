@@ -1,99 +1,77 @@
 # File: orbit.py
 # Programmer: Connor Fricke (cd.fricke23@gmail.com)
 # Last Revision:
-#   28-FEB-2024 ---> defined commonly used vectors, object class, initialized project
-#   29-FEB-2024 ---> defined gravity as inverse square law, assessed TODO list
-# 
-# The primary purpose of this script is to learn how to create classes in python and get familiar
-# with the PyGame module for simple visualizations and simulations. This script in particular demonstrates
-# the capabilities of the Grid, Arrow, and Trail classes, as well as the color functions from colors.py
+#   27-MARCH-2024 --> created
+#
+# Python script for simulation of a Keplerian orbit. Mass units are kilograms, distance units are meters (1 px = 1 m)
 # TODO:
-#   - add some GUI stuff
-#   - do simulation calculations from array of orbitors
+#   - add plotting of data
+#   - use real values (real gravitational constant, more realistic masses and separations)
+#   - create class for writing fonts and putting text to the screen
+
+# libraries for analysis
+import matplotlib.pyplot as plt
+import pygame
+
+# CLASS FILES
+from trail import *
+from arrow import *
+from text import *
+from satellite import *
 
 # *** INITIALIZE ***
-import pygame
-# my classes
-from grid import *
-from colors import *
-from arrow import *
-from trail import *
-
-WIDTH = 720
+times = []
+velocities = []
+momentums = []
+WIDTH = 1000
 HEIGHT = 720
 pygame.init()
 screen = pygame.display.set_mode((WIDTH+1, HEIGHT+1))
 clock = pygame.time.Clock()
 running = True
-inFront = True
 dt = 0
 frame = 0
-GRAV = 40.0
 simulationTime = 0
+angularMomentum = 0
+halfPeriodCounter = 0
+period = 0
 # ******************
 
 # *** COMMON VECTORS AND LOCATIONS ***
-
 center = pygame.Vector2(WIDTH / 2, HEIGHT / 2)
 zero = pygame.Vector2(0, 0)
 origin = zero
 xhat = pygame.Vector2(1, 0)
 yhat = pygame.Vector2(0, 1)
 
-# ************************************
+# *** CONSTANTS ***
+GRAV = 6.674E-11 # N m^2 kg^-2
+SUN_MASS = 6.5e15 # kg
+INITIAL_POS = center + 250*xhat
+RATE = 5  
 
-# *** CLASS DEFINITIONS ***
-# NOTE THAT THESE CLASS DEFINITIONS RELY ON SOME OF THE DEFINED VARIABLES ABOVE
+# ***** INITIAL CONDITIONS *****  
+sun = Satellite(mass=SUN_MASS, radius=20.0)
+sun.setPosition(center)
+orbitor = Satellite(mass=5.0, radius=10.0)
+orbitor.position = INITIAL_POS
+orbitor.velocity = 45*yhat
 
-class Object:
-    """This is the base object of the simulation. It is drawn in the window as a circle"""
-    def __init__(self, radius, mass):
-        # constants
-        self.RADIUS = radius
-        self.MASS = mass
-        # variables
-        self.position = center          # set position at middle of screen
-        self.velocity = origin            # set velocity to zero
-        self.acceleration = zero        # set acceleration to zero
-        self.force = zero               # this is the force that the current object "feels"
+# *** ARROWS + TRAILS ***
+orbitorTrail1 = Trail(1575)
+orbitorTrail1.addPoint(orbitor.position.copy())
+accelArrow = Arrow(orbitor.position, orbitor.position - xhat)
 
-    # call draw() to automatically draw the circle with it's current attributes
-    def draw(self, surface, color):
-        pygame.draw.circle(surface=surface, color=color, center=self.position, radius=self.RADIUS)
-
-    def update(self, deltaTime):
-        # update acceleration, velocity, and position
-        self.acceleration = self.force / self.MASS
-        self.velocity += self.acceleration
-        self.position += self.velocity * deltaTime
-        
-# *************************
-
-# ***** INITIAL CONDITIONS *****
-# sun object, default position and velocity
-sun = Object(mass=100.0, radius=20.0)
-# orbitor1 object, non-default position and velocity
-orbitor1 = Object(mass=5.0, radius=10.0)
-orbitor1.position = center + 250*xhat
-orbitor1.velocity = 31*yhat
-# orbitor2 object, non-default position and velocity
-orbitor2 = Object(mass=5.0, radius=10.0)
-orbitor2.position = center + 100*xhat
-orbitor2.velocity = 50*yhat
-# orbitor2 object, non-default position and velocity
-orbitor3 = Object(mass=5.0, radius=5.0)
-orbitor3.position = center + 50*xhat
-orbitor3.velocity = 70*yhat
-
-# *** ARROWS, GRIDS, AND TRAILS ***
-radialArrow = Arrow(sun.position, orbitor3.position)
-gameGrid = Grid(72,72, WIDTH, HEIGHT)
-orbitorTrail1 = Trail(600)
-orbitorTrail1.addPoint(orbitor1.position.copy())
-orbitorTrail2 = Trail(300)
-orbitorTrail2.addPoint(orbitor2.position.copy())
-orbitorTrail3 = Trail(100)
-orbitorTrail3.addPoint(orbitor3.position.copy())
+# *** TEXT ***
+periodData = Text()
+periodData.set_font("consolas", 12, True, False, "white")
+sunText = Text()
+sunText.set_font("consolas", 12, True, False, "white")
+sunText.text("Hello World!")
+earthText = Text()
+earthText.set_font("consolas", 12, True, False, "red")
+earthText.text("Hello Sun!") 
+# ******************
 
 # ***** GAME LOOP *****
 while running:
@@ -105,65 +83,67 @@ while running:
     # wipe away anything from the previous frame
     screen.fill("black")
 
-    currentPosition1 = orbitor1.position.copy()
-    currentPosition2 = orbitor2.position.copy()
-    currentPosition3 = orbitor3.position.copy()
-    # add current position of the orbitor1 to the Trail object array every 20 frames
-    if (frame % 5 == 0):
-        orbitorTrail1.addPoint(currentPosition1)
-        orbitorTrail2.addPoint(currentPosition2)
-        orbitorTrail3.addPoint(currentPosition3)
-    
-    # set arrow data
-    radialArrow.update(sun.position, orbitor3.position)
+    # add current position of the orbitor to the Trail Satellite array every frame
+    currentPosition1 = orbitor.position.copy()
+    orbitorTrail1.addPoint(currentPosition1)
 
-    # ***** RENDER THE GAME HERE *****
-    
-    # GRID
-    gameGrid.drawRectangles(screen, colorFunction1)
-
-    # TRAILS
-    orbitorTrail1.aadraw(screen, "green", 1)
-    orbitorTrail2.aadraw(screen, "green", 1)
-    orbitorTrail3.aadraw(screen, "green", 1)
-
-    # ORBITORS
-    orbitor1.draw(screen, "blue")
-    orbitor2.draw(screen, "orange")
-    orbitor3.draw(screen, "red")
-
-    # SUN
-    sun.draw(screen, "yellow")
-
-    # ARROWS
-    radialArrow.draw(screen, "white", 3)
-    
     # CALCULATE FORCES
     # force points from circle position to the center
-    r1 = (orbitor1.position - sun.position)
-    rhat1 = r1 / r1.magnitude()
-    r2 = (orbitor2.position - sun.position)
-    rhat2 = r2 / r2.magnitude()
-    r3 = (orbitor3.position - sun.position)
-    rhat3 = r3 / r3.magnitude()
-    
-    orbitor1.force = -((GRAV * sun.MASS * orbitor1.MASS) / (r1.magnitude() * r1.magnitude())) * rhat1
-    orbitor2.force = -((GRAV * sun.MASS * orbitor2.MASS) / (r2.magnitude() * r2.magnitude())) * rhat2
-    orbitor3.force = -((GRAV * sun.MASS * orbitor3.MASS) / (r3.magnitude() * r3.magnitude())) * rhat3
+    radius = (orbitor.position - sun.position)
+    rhat = radius / radius.magnitude()
+    # a = GM/r^2
+    orbitor.acceleration = -((GRAV * sun.MASS) / (radius.magnitude() * radius.magnitude())) * rhat
+
+    # L = mvr
+    angularMomentum = orbitor.MASS * orbitor.velocity.magnitude() * radius.magnitude()
+
+    # once we have the acceleration, we can decide how to draw the acceleration arrow
+    accelArrow.update(orbitor.position, orbitor.position + orbitor.acceleration*5)
 
     # update acceleration, velocity, and position of each orbitor (NOT the sun... assuming Keplerian Limit M >> m)
-    orbitor1.update(dt)
-    orbitor2.update(dt)
-    orbitor3.update(dt)
+    vBefore = orbitor.velocity.copy()
+    orbitor.update(RATE*dt)
+    vAfter = orbitor.velocity.copy()
+    if (vBefore.x*vAfter.x < 0):
+        halfPeriodCounter += 1
+        period = simulationTime * 2 / halfPeriodCounter
+
+    # ***** RENDER THE GAME HERE *****
+    # TRAIL
+    orbitorTrail1.aadraw(screen, "white", 1)
+    # ORBITOR / SUN
+    orbitor.draw(screen, "blue")
+    sun.draw(screen, "yellow")
+    # ARROW
+    accelArrow.draw(screen, "white", 1)
+
+    # Render text at specified locations
+    periodData.text(f"Orbital Period: {round(period, 2)} seconds" + (" (Calculating...)" if period == 0 else ""))
+    periodData.render(screen, 20*xhat + 20*yhat)
+    sunText.render(screen, sun.position + 20*xhat - 20*yhat)
+    earthText.render(screen, orbitor.position + 20*xhat - 20*yhat)
 
     # flip() display to send work to the screen
     pygame.display.flip()
 
     # limit to 50 fps (dt ~ 0.02)
-    dt = clock.tick(50) / 1000
-    # track
-    simulationTime += dt
+    dt = clock.tick(100) / 1000
+    # track a couple things for use
+    simulationTime += dt * RATE
     frame += 1
-    print(simulationTime)
+    # add data to our times and velocities arrays to plot after the sim runs
+    times.append(simulationTime)
+    velocities.append(orbitor.velocity.magnitude())
+    momentums.append(angularMomentum)
 
 pygame.quit()
+
+# *** DATA ANALYSIS ***
+fig, ax = plt.subplots()
+ax.set_ylabel("$v$ (px $\\rm s^{-1}$)")
+ax.set_xlabel("Time (s)")
+ax.set_title("Velocity vs. time")
+ax.plot(times, velocities)
+plt.show()
+# ******************
+
