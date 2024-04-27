@@ -10,7 +10,7 @@ class Satellite:
     """
     Main orbitor object in simulation.
     """
-    def __init__(self, radius, mass):
+    def __init__(self, radius: float, mass: float):
         # constants
         self.RADIUS = radius
         self.MASS = mass
@@ -20,17 +20,17 @@ class Satellite:
         self.acceleration = pygame.Vector2(0,0)
 
     # call draw() to automatically draw the circle with it's current attributes
-    def draw(self, surface, color):
+    def draw(self, surface: pygame.Surface, color: pygame.Color) -> None:
         """Renders Satellite object as a circle"""
         pygame.draw.circle(surface=surface, color=color, center=self.position, radius=self.RADIUS)
 
-    def setPosition(self, pos):
+    def setPosition(self, pos: pygame.Vector2):
         self.position = pos
 
-    def setVelocity(self, vel):
+    def setVelocity(self, vel: pygame.Vector2):
         self.velocity = vel
 
-    def update(self, deltaTime):
+    def update(self, deltaTime: float):
         """
         Calculates instantaneous velocity and position change based on accelaration
         """

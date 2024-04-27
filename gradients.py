@@ -55,6 +55,5 @@ while (running):
     pg.display.flip()
 
     dt = clock.tick(100) / 1000
-    print(int(1/dt))
 
 pg.quit()
