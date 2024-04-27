@@ -9,15 +9,13 @@
 #   - use real values (real gravitational constant, more realistic masses and separations)
 #   - create class for writing fonts and putting text to the screen
 
-# libraries for analysis
-import matplotlib.pyplot as plt
-import pygame
+import pygame as pg
 
 # CLASS FILES
-from Classes.trail import *
-from Classes.arrow import *
-from Classes.text import *
-from Classes.satellite import *
+from Utils.trail import *
+from Utils.arrow import *
+from Utils.text import *
+from Utils.satellite import *
 
 # *** INITIALIZE ***
 times = []
@@ -25,9 +23,9 @@ velocities = []
 momentums = []
 WIDTH = 1000
 HEIGHT = 720
-pygame.init()
-screen = pygame.display.set_mode((WIDTH+1, HEIGHT+1))
-clock = pygame.time.Clock()
+pg.init()
+screen = pg.display.set_mode((WIDTH+1, HEIGHT+1))
+clock = pg.time.Clock()
 running = True
 dt = 0
 frame = 0
@@ -38,17 +36,17 @@ period = 0
 # ******************
 
 # *** COMMON VECTORS AND LOCATIONS ***
-center = pygame.Vector2(WIDTH / 2, HEIGHT / 2)
-zero = pygame.Vector2(0, 0)
+center = pg.Vector2(WIDTH / 2, HEIGHT / 2)
+zero = pg.Vector2(0, 0)
 origin = zero
-xhat = pygame.Vector2(1, 0)
-yhat = pygame.Vector2(0, 1)
+xhat = pg.Vector2(1, 0)
+yhat = pg.Vector2(0, 1)
 
 # *** CONSTANTS ***
 GRAV = 6.674E-11 # N m^2 kg^-2
 SUN_MASS = 6.5e15 # kg
 INITIAL_POS = center + 250*xhat
-RATE = 5  
+RATE = 0.5
 
 # ***** INITIAL CONDITIONS *****  
 sun = Satellite(mass=SUN_MASS, radius=20.0)
@@ -75,9 +73,9 @@ earthText.text("Hello Sun!")
 
 # ***** GAME LOOP *****
 while running:
-    # pygame.QUIT means the user closed the window
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+    # pg.QUIT means the user closed the window
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
             running = False
     
     # wipe away anything from the previous frame
@@ -109,41 +107,29 @@ while running:
         period = simulationTime * 2 / halfPeriodCounter
 
     # ***** RENDER THE GAME HERE *****
-    # TRAIL
     orbitorTrail1.aadraw(screen, "white", 1)
-    # ORBITOR / SUN
     orbitor.draw(screen, "blue")
     sun.draw(screen, "yellow")
-    # ARROW
-    accelArrow.draw(screen, "white", 1)
+    accelArrow.draw(screen, "white", 3)
 
-    # Render text at specified locations
+    # Render text
     periodData.text(f"Orbital Period: {round(period, 2)} seconds" + (" (Calculating...)" if period == 0 else ""))
     periodData.render(screen, 20*xhat + 20*yhat)
     sunText.render(screen, sun.position + 20*xhat - 20*yhat)
     earthText.render(screen, orbitor.position + 20*xhat - 20*yhat)
 
     # flip() display to send work to the screen
-    pygame.display.flip()
+    pg.display.flip()
 
-    # limit to 50 fps (dt ~ 0.02)
+    # limit fps
     dt = clock.tick(100) / 1000
-    # track a couple things for use
+
     simulationTime += dt * RATE
     frame += 1
-    # add data to our times and velocities arrays to plot after the sim runs
     times.append(simulationTime)
     velocities.append(orbitor.velocity.magnitude())
     momentums.append(angularMomentum)
 
-pygame.quit()
-
-# *** DATA ANALYSIS ***
-fig, ax = plt.subplots()
-ax.set_ylabel("$v$ (px $\\rm s^{-1}$)")
-ax.set_xlabel("Time (s)")
-ax.set_title("Velocity vs. time")
-ax.plot(times, velocities)
-plt.show()
+pg.quit()
 # ******************
 

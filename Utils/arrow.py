@@ -5,13 +5,10 @@
 
 import pygame
 
-# *** CLASS DEFINITIONS ***
-# NOTE THAT THESE CLASS DEFINITIONS RELY ON SOME OF THE DEFINED VARIABLES ABOVE
-
 # ARROW : class object for drawing arrows between positions on the screen.
 class Arrow:
     
-    def __init__(self, tail, tip):
+    def __init__(self, tail: pygame.Vector2, tip: pygame.Vector2):
         """
         Arrow.__init__(tail, tip):
         parameters:
@@ -25,12 +22,8 @@ class Arrow:
         """
         self.tip = tip
         self.tail = tail
-        self.length = (tip - tail).magnitude()
-        self.direction = (tip - tail) / self.length
-        self.perpendicular = pygame.Vector2(self.direction.y, -self.direction.x)
-
     
-    def draw(self, surface, color, thickness):
+    def draw(self, surface: pygame.Surface, color: pygame.Color, thickness: int) -> None:
         """
         Arrow.draw(surface, color, thickness):
         parameters:
@@ -44,16 +37,19 @@ class Arrow:
         along the length of the arrow from tail to tip and a distance from the body of the arrow defined as 2% of the length of the arrow from
         tail to tip. As long as the percentanges add up to 1 (e.g. 98% + 2%), the arrowhead will make 45 degree angles with the body of the arrow.
         """
-        # central body
-        pygame.draw.aaline(surface=surface, color=color, start_pos=self.tail, end_pos=self.tip, blend=thickness)
+        length = (self.tip - self.tail).magnitude()
+        direction = (self.tip - self.tail) / length
+        perpendicular = pygame.Vector2(direction.y, -direction.x)
         # angled tip
-        leftAngled = self.tail + (0.9 * self.length * self.direction) + (0.1 * self.length * self.perpendicular)
-        rightAngled = self.tail + (0.9 * self.length * self.direction) - (0.1 * self.length * self.perpendicular)
+        leftAngled = self.tail + (0.8 * length * direction) + (0.2 * length * perpendicular)
+        rightAngled = self.tail + (0.8 * length * direction) + (-0.2 * length * perpendicular)
         points = [leftAngled, self.tip, rightAngled]
-        pygame.draw.aalines(surface=surface, color=color, closed=False, points=points, blend=thickness)
+        pygame.draw.lines(surface=surface, color=color, closed=False, points=points, width=thickness)
+        # central body
+        pygame.draw.line(surface=surface, color=color, start_pos=self.tail, end_pos=self.tip, width=thickness)
 
     
-    def update(self, tail, tip):
+    def update(self, tail: pygame.Vector2, tip: pygame.Vector2) -> None:
         """
         Arrow.update(tail, tip):
         parameters:
@@ -65,6 +61,3 @@ class Arrow:
         """
         self.tip = tip
         self.tail = tail
-        self.length = (tip - tail).magnitude()
-        self.direction = (tip - tail) / self.length
-        self.perpendicular = pygame.Vector2(self.direction.y, -self.direction.x)

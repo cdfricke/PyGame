@@ -8,14 +8,15 @@
 # ************************************************
 
 import pygame
-import random
+import random as rand
+
 
 # *** CLASS DEFINITION ***
 
 # GRID: class object for drawing a grid with a certain number of rows and columns on the screen.
 class Grid:
     
-    def __init__(self, rows, columns, width, height):
+    def __init__(self, rows: int, columns: int, width: int, height: int):
         """
         Grid.__init__(rows, columns):
         parameters:
@@ -39,11 +40,11 @@ class Grid:
         self.numCols = columns
         self.xticks = list(range(0, width + 1, int(width / columns)))
         self.yticks = list(range(0, height + 1, int(height / rows)))
-        # initially, the matrix is populated with random values
-        self.Matrix = [[random.random() for x in range(columns)] for y in range(rows)]
+        # initially, the matrix is populated with zeros
+        self.Matrix = [[0 for col in range(columns)] for row in range(rows)]
     
 
-    def drawLines(self, surface, color, thickness):
+    def drawLines(self, surface, color, thickness) -> None:
         """
         Grid.drawLines(surface, color, thickness):
         parameters:
@@ -65,7 +66,7 @@ class Grid:
             pygame.draw.line(surface=surface, color=color, start_pos=start, end_pos=end, width=thickness)
             
     
-    def drawRectangles(self, surface, colorFunc):
+    def drawRectangles(self, surface: pygame.Surface, colorFunc) -> None:
         """
         Grid.drawRectangles(self, surface, colorFunc):
         parameters:
@@ -81,15 +82,40 @@ class Grid:
                 rect = pygame.Rect(self.xticks[x], self.yticks[y], self.width / self.numCols, self.height / self.numRows)
                 pygame.draw.rect(surface, colorFunc(self.Matrix[y][x]), rect)
 
-
-    def fillMatrix(self):
+    def verticalGradientMatrix(self) -> None:
         """
-        Grid.fillMatrix()
+        Grid.verticalGradientMatrix()
         parameters: none
     
-        This function decides how to populate the matrix of floats that decides the color of each rectangle
-        Whatever this function yields, it must be a value between 0 and 1
+        This function populates the grid's matrix with values between 0 and 1.
+        These values are smaller near the "top" of the matrix, but increase for
+        "lower" rows.
         """
         for y in range(self.numRows):
             for x in range(self.numCols):
                 self.Matrix[y][x] = float(y / self.numRows)
+
+    def horizontalGradientMatrix(self) -> None:
+        """
+        Grid.horizontalGradientMatrix()
+        parameters: none
+    
+        This function populates the grid's matrix with values between 0 and 1.
+        These values are smaller near the left side of the matrix, but increase for
+        further right columns.
+        """
+        for y in range(self.numRows):
+            for x in range(self.numCols):
+                self.Matrix[y][x] = float(x / self.numCols)
+
+    def randomizeMatrix(self) -> None:
+        """
+        Grid.randomizeMatrix()
+        parameters: none
+    
+        This function populates the grid's matrix with values between 0 and 1.
+        These values are randomized.
+        """
+        for y in range(self.numRows):
+            for x in range(self.numCols):
+                self.Matrix[y][x] = rand.uniform(0, 1)
