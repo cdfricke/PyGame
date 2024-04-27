@@ -16,17 +16,17 @@ class Text:
         self.color = "white"
         self.txt = "UNINITIALIZED"
 
-    def set_font(self, fontName, size, bold, italics, color):
+    def set_font(self, fontName: str, size: int, bold: bool, italics: bool, color: pygame.Color) -> None:
         self.fontName = fontName
         self.size = size
         self.bold = bold
         self.italic = italics
         self.color = color
 
-    def text(self, textString):
+    def text(self, textString: str) -> None:
         self.txt = textString
 
-    def render(self, surface, location):
+    def render(self, surface: pygame.Surface, location: pygame.Vector2) -> None:
         font = pygame.font.SysFont(name=self.fontName, size=self.size, bold=self.bold, italic=self.italic)
         text = font.render(self.txt, True, self.color)
         surface.blit(text, location)
