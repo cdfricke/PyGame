@@ -20,8 +20,8 @@ simulationTime = 0
 # ******************
 
 # CLASS FILES
-from text import *
-from satellite import *
+from Classes.text import *
+from Classes.satellite import *
 
 # *** COMMON VECTORS AND LOCATIONS ***
 center = pygame.Vector2(WIDTH / 2, HEIGHT / 2)
@@ -41,7 +41,7 @@ AU = 1.496e11 # meters per AU
 
 # *** HELPER FUNCTIONS ***
 
-def toCartesian(radius, angle) -> pygame.Vector2:
+def toCartesian(radius: float, angle: float) -> pygame.Vector2:
     """
     Converts a radius and angle to polar coordinates relative to a center-screen origin
     """

@@ -14,10 +14,10 @@ import matplotlib.pyplot as plt
 import pygame
 
 # CLASS FILES
-from trail import *
-from arrow import *
-from text import *
-from satellite import *
+from Classes.trail import *
+from Classes.arrow import *
+from Classes.text import *
+from Classes.satellite import *
 
 # *** INITIALIZE ***
 times = []
